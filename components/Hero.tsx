@@ -10,8 +10,8 @@ export const Hero: React.FC = () => {
       {/* Image de fond avec effet */}
       <div className="absolute inset-0 z-0">
         <img 
-          src="https://picsum.photos/1920/1080?grayscale&blur=2" 
-          alt="Hero Background" 
+          src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1920" 
+          alt="Villa de luxe en Guinée" 
           className="w-full h-full object-cover opacity-40"
         />
       </div>

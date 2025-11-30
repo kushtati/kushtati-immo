@@ -1,0 +1,48 @@
+# Dépendances Node.js
+node_modules
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# Build
+dist
+build
+
+# Environnement
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Tests
+coverage
+.nyc_output
+
+# Fichiers temporaires
+tmp
+temp
+*.tmp
+
+# Python (pour le virtual env)
+.venv
+__pycache__
+*.py[cod]

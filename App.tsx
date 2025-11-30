@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PropertyCard } from './components/PropertyCard';
 import { AIAdvisor } from './components/AIAdvisor';
+import { propertiesAPI } from './services/api';
 import { Navigation } from './components/Navigation';
 import { Hero } from './components/Hero';
 import { Statistics } from './components/Statistics';
@@ -102,11 +103,54 @@ const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<'home' | 'properties' | 'agents' | 'about' | 'contact' | 'add-property' | 'login' | 'dashboard'>('home');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userType, setUserType] = useState<'proprietaire' | 'locataire' | null>(null);
+  
+  // États pour les données de l'API
+  const [properties, setProperties] = useState<Property[]>(MOCK_PROPERTIES);
+  const [loading, setLoading] = useState(true);
+
+  // Charger les propriétés depuis l'API au démarrage
+  useEffect(() => {
+    loadProperties();
+  }, []);
+
+  const loadProperties = async () => {
+    try {
+      setLoading(true);
+      
+      // Charger depuis l'API
+      const apiProperties = await propertiesAPI.getAll();
+      
+      // Convertir les propriétés de l'API vers le format local
+      const convertedProperties: Property[] = apiProperties.map((prop: any) => ({
+        id: prop.id.toString(),
+        title: prop.title,
+        price: prop.price,
+        location: prop.location,
+        beds: prop.beds || 0,
+        baths: prop.baths || 0,
+        sqft: prop.sqft || 0,
+        imageUrl: prop.image_url 
+          ? `http://localhost:5000${prop.image_url}` 
+          : `https://picsum.photos/800/600?random=${prop.id}`,
+        type: prop.type,
+        featured: false
+      }));
+      
+      setProperties(convertedProperties);
+      console.log(`✅ ${convertedProperties.length} propriétés chargées depuis l'API`);
+    } catch (err) {
+      console.warn('⚠️ Erreur API, utilisation des données de démonstration:', err);
+      // Garder les données mockées en cas d'erreur
+      setProperties(MOCK_PROPERTIES);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Filtrage des propriétés selon l'onglet actif
   const filteredProperties = activeTab === 'All' 
-    ? MOCK_PROPERTIES 
-    : MOCK_PROPERTIES.filter(p => p.type === activeTab);
+    ? properties 
+    : properties.filter(p => p.type === activeTab);
 
   // Fonction pour changer de page
   const navigateToPage = (page: 'home' | 'properties' | 'agents' | 'about' | 'contact' | 'add-property' | 'login' | 'dashboard') => {
@@ -177,18 +221,22 @@ const App: React.FC = () => {
                     >
                       {tab === 'All' ? 'Toutes' : tab === 'Sale' ? 'À Vendre' : 'À Louer'}
                     </button>
-                  ))}
-                </div>
+                ))}
               </div>
+            </div>
 
-              {/* Grille de cartes de propriétés */}
+            {/* Grille de cartes de propriétés */}
+            {filteredProperties.length === 0 ? (
+              <div className="text-center py-12 text-slate-600">
+                Aucune propriété disponible
+              </div>
+            ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredProperties.map((property) => (
                   <PropertyCard key={property.id} property={property} />
                 ))}
               </div>
-
-              {/* Bouton pour voir plus */}
+            )}              {/* Bouton pour voir plus */}
               <div className="mt-16 text-center">
                 <button 
                   onClick={() => navigateToPage('properties')}
