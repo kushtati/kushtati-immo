@@ -19,80 +19,6 @@ import TenantDashboardPage from './components/TenantDashboardPage';
 import { Property } from './types';
 
 /**
- * DONNÉES DE DÉMONSTRATION
- * Liste des propriétés affichées sur le site
- */
-const MOCK_PROPERTIES: Property[] = [
-  {
-    id: '1',
-    title: 'Villa Moderne Front de Mer',
-    price: 12500000000,
-    location: 'Camayenne, Conakry',
-    beds: 4,
-    baths: 3,
-    sqft: 3200,
-    imageUrl: 'https://picsum.photos/800/600?random=1',
-    type: 'Sale',
-    featured: true
-  },
-  {
-    id: '2',
-    title: 'Appartement Moderne Centre-Ville',
-    price: 4500000,
-    location: 'Kaloum, Conakry',
-    beds: 2,
-    baths: 2,
-    sqft: 1400,
-    imageUrl: 'https://picsum.photos/800/600?random=2',
-    type: 'Rent'
-  },
-  {
-    id: '3',
-    title: 'Résidence Familiale de Prestige',
-    price: 8900000000,
-    location: 'Kipé, Ratoma',
-    beds: 5,
-    baths: 4,
-    sqft: 4100,
-    imageUrl: 'https://picsum.photos/800/600?random=3',
-    type: 'Sale'
-  },
-  {
-    id: '4',
-    title: 'Studio Minimaliste',
-    price: 1800000,
-    location: 'Almamya, Kaloum',
-    beds: 1,
-    baths: 1,
-    sqft: 650,
-    imageUrl: 'https://picsum.photos/800/600?random=4',
-    type: 'Rent'
-  },
-  {
-    id: '5',
-    title: 'Villa de Luxe aux Collines',
-    price: 21000000000,
-    location: 'Taouyah, Dubréka',
-    beds: 6,
-    baths: 5,
-    sqft: 5500,
-    imageUrl: 'https://picsum.photos/800/600?random=5',
-    type: 'Sale'
-  },
-  {
-    id: '6',
-    title: 'Maison avec Jardin',
-    price: 5500000000,
-    location: 'Hamdallaye, Ratoma',
-    beds: 3,
-    baths: 2,
-    sqft: 1800,
-    imageUrl: 'https://picsum.photos/800/600?random=6',
-    type: 'Sale'
-  }
-];
-
-/**
  * COMPOSANT PRINCIPAL DE L'APPLICATION
  * Gère l'état global et organise les différentes sections du site
  */
@@ -105,7 +31,7 @@ const App: React.FC = () => {
   const [userType, setUserType] = useState<'proprietaire' | 'locataire' | null>(null);
   
   // États pour les données de l'API
-  const [properties, setProperties] = useState<Property[]>(MOCK_PROPERTIES);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Charger les propriétés depuis l'API au démarrage
@@ -140,9 +66,8 @@ const App: React.FC = () => {
       setProperties(convertedProperties);
       console.log(`✅ ${convertedProperties.length} propriétés chargées depuis l'API`);
     } catch (err) {
-      console.warn('⚠️ Erreur API, utilisation des données de démonstration:', err);
-      // Garder les données mockées en cas d'erreur
-      setProperties(MOCK_PROPERTIES);
+      console.error('❌ Erreur lors du chargement des propriétés:', err);
+      setProperties([]);
     } finally {
       setLoading(false);
     }
