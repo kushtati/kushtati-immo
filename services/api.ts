@@ -1,9 +1,7 @@
 import axios from 'axios';
 
 // Configuration API pour différents environnements
-// En production (Railway), utilise la variable d'environnement VITE_API_URL
-// En développement local avec Docker, utilise le proxy nginx local
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://kushtati-immo-api.onrender.com/api';
 
 // Instance axios avec configuration
 const api = axios.create({
