@@ -47,7 +47,7 @@ const App: React.FC = () => {
       const apiProperties = await propertiesAPI.getAll();
       
       // Convertir les propriétés de l'API vers le format local
-      const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+      const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://kushtati-immo-api.onrender.com';
       const convertedProperties: Property[] = apiProperties.map((prop: any) => ({
         id: prop.id.toString(),
         title: prop.title,
