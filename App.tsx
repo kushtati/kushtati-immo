@@ -121,6 +121,7 @@ const App: React.FC = () => {
       const apiProperties = await propertiesAPI.getAll();
       
       // Convertir les propriétés de l'API vers le format local
+      const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
       const convertedProperties: Property[] = apiProperties.map((prop: any) => ({
         id: prop.id.toString(),
         title: prop.title,
@@ -130,7 +131,7 @@ const App: React.FC = () => {
         baths: prop.baths || 0,
         sqft: prop.sqft || 0,
         imageUrl: prop.image_url 
-          ? `http://localhost:5000${prop.image_url}` 
+          ? `${API_BASE}${prop.image_url}` 
           : `https://picsum.photos/800/600?random=${prop.id}`,
         type: prop.type,
         featured: false
