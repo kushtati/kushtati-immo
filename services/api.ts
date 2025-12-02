@@ -239,4 +239,22 @@ export const usersAPI = {
   },
 };
 
+// API Contact
+export const contactAPI = {
+  send: async (formData: {
+    name: string;
+    email: string;
+    phone: string;
+    subject: string;
+    message: string;
+  }) => {
+    // Pour l'instant, on simule l'envoi
+    console.log('📧 Message de contact:', formData);
+    return Promise.resolve({ success: true, message: 'Message envoyé avec succès' });
+    // TODO: Implémenter l'API backend /api/contact
+    // const response = await api.post('/contact', formData);
+    // return response.data;
+  },
+};
+
 export default api;

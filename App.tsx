@@ -185,7 +185,7 @@ const App: React.FC = () => {
         </>
       )}
 
-      {currentPage === 'properties' && <PropertiesPage properties={MOCK_PROPERTIES} />}
+      {currentPage === 'properties' && <PropertiesPage properties={properties} />}
       {currentPage === 'agents' && <AgentsPage />}
       {currentPage === 'about' && <AboutPage />}
       {currentPage === 'contact' && <ContactPage />}
