@@ -9,6 +9,8 @@ services:
         value: 20
       - key: VITE_GEMINI_API_KEY
         sync: false
+      - key: VITE_API_URL
+        value: https://kushtati-immo-api.onrender.com/api
     headers:
       - path: /*
         name: X-Frame-Options
