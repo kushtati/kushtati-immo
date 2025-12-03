@@ -45,7 +45,9 @@ export const generateRealEstateAdvice = async (
     You help users find properties in Conakry and surrounding areas, understand real estate terms, and value homes.
     Prices are in Guinean Francs (GNF). You know the neighborhoods of Conakry: Kaloum, Camayenne, Kipé, Ratoma, Hamdallaye, etc.
     If asked about the agency, emphasize our expertise in Guinea's real estate market and personalized service.
-    Keep responses concise (under 100 words) unless asked for a detailed explanation.`;
+    Keep responses concise (under 100 words) unless asked for a detailed explanation.
+    
+    IMPORTANT: Always respond using plain text. Do NOT use Markdown formatting (no asterisks *, bold **, or bullet points). Use simple line breaks and clear sentences instead.`;
 
     // Appel à l'API Gemini avec l'historique et le nouveau message
     const response = await ai.models.generateContent({
@@ -68,7 +70,19 @@ export const generateRealEstateAdvice = async (
       }
     });
 
-    return response.text || "I apologize, I couldn't generate a response at this moment.";
+    // Nettoyer la réponse : supprimer les astérisques et autres symboles Markdown
+    let cleanText = response.text || "I apologize, I couldn't generate a response at this moment.";
+    
+    // Supprimer les astérisques (*, **, ***)
+    cleanText = cleanText.replace(/\*+/g, '');
+    
+    // Supprimer les tirets et plus en début de ligne (listes)
+    cleanText = cleanText.replace(/^[\-\+]\s+/gm, '');
+    
+    // Supprimer les # (titres Markdown)
+    cleanText = cleanText.replace(/^#+\s+/gm, '');
+    
+    return cleanText.trim();
   } catch (error) {
     console.error("Error calling Gemini API:", error);
     
