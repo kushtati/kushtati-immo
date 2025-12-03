@@ -56,9 +56,11 @@ const App: React.FC = () => {
         beds: prop.beds || 0,
         baths: prop.baths || 0,
         sqft: prop.sqft || 0,
-        imageUrl: prop.image_url 
-          ? `${API_BASE}${prop.image_url}` 
-          : `https://picsum.photos/800/600?random=${prop.id}`,
+        imageUrl: prop.image_url && prop.image_url.startsWith('http')
+          ? prop.image_url  // URL complète (Unsplash)
+          : prop.image_url 
+            ? `${API_BASE}${prop.image_url}`  // Chemin relatif
+            : `https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&h=600&fit=crop`,
         type: prop.type,
         featured: false
       }));
