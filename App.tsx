@@ -164,16 +164,18 @@ const App: React.FC = () => {
                   <PropertyCard key={property.id} property={property} />
                 ))}
               </div>
-            )}              {/* Bouton pour voir plus */}
-              <div className="mt-16 text-center">
-                <button 
-                  onClick={() => navigateToPage('properties')}
-                  className="border-2 border-brand-primary text-brand-primary px-10 py-3 rounded-full font-bold hover:bg-brand-primary hover:text-white transition-all duration-300"
-                >
-                  Voir Toutes les Propriétés
-                </button>
-              </div>
+            )}
+            
+            {/* Bouton pour voir plus */}
+            <div className="mt-16 text-center">
+              <button 
+                onClick={() => navigateToPage('properties')}
+                className="border-2 border-brand-primary text-brand-primary px-10 py-3 rounded-full font-bold hover:bg-brand-primary hover:text-white transition-all duration-300"
+              >
+                Voir Toutes les Propriétés
+              </button>
             </div>
+          </div>
           </section>
 
           {/* Section des statistiques */}
