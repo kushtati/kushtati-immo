@@ -12,15 +12,8 @@ let client: GoogleGenAI | null = null;
  */
 const getClient = (): GoogleGenAI => {
   if (!client) {
-    // Récupérer la clé API depuis les variables d'environnement
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    
-    // Vérifier que la clé API est bien configurée
-    if (!apiKey || apiKey === 'your_gemini_api_key_here') {
-      throw new Error(
-        'Gemini API key is not configured. Please add VITE_GEMINI_API_KEY to your .env file.'
-      );
-    }
+    // Clé API Gemini hardcodée pour Render
+    const apiKey = 'AIzaSyDSIDbkewkNLuE6Vh3r_a7_ggreZ3niB70';
     
     // Créer l'instance du client
     client = new GoogleGenAI({ apiKey });
