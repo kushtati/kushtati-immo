@@ -96,7 +96,7 @@ const App: React.FC = () => {
   };
 
   // Fonction de connexion
-  const handleLogin = (type: 'proprietaire' | 'locataire') => {
+  const handleLogin = (type: 'proprietaire' | 'locataire', userData: any) => {
     setIsLoggedIn(true);
     setUserType(type);
     // Rediriger vers le tableau de bord approprié

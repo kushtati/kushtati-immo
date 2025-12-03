@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Mail, Lock, User, Home, Key } from 'lucide-react';
+import { Mail, Lock, User, Home, Key, Phone } from 'lucide-react';
 
 interface LoginPageProps {
-  onLogin: (userType: 'proprietaire' | 'locataire') => void;
+  onLogin: (userType: 'proprietaire' | 'locataire', userData: any) => void;
 }
 
 /**
@@ -16,20 +16,63 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     email: '',
     password: '',
     confirmPassword: '',
+    phone: '',
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const API_BASE = import.meta.env.VITE_API_URL || 'https://kushtati-immo-api.onrender.com/api';
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     
     if (!isLogin && formData.password !== formData.confirmPassword) {
-      alert('Les mots de passe ne correspondent pas');
+      setError('Les mots de passe ne correspondent pas');
       return;
     }
 
-    // Simulation de connexion
-    console.log('Connexion:', { ...formData, userType, isLogin });
-    alert(`${isLogin ? 'Connexion' : 'Inscription'} réussie en tant que ${userType} !`);
-    onLogin(userType);
+    setLoading(true);
+
+    try {
+      const endpoint = isLogin ? `${API_BASE}/auth/login` : `${API_BASE}/auth/register`;
+      const role = userType === 'proprietaire' ? 'owner' : 'tenant';
+      
+      const payload = isLogin 
+        ? { email: formData.email, password: formData.password }
+        : { 
+            email: formData.email, 
+            password: formData.password, 
+            name: formData.name,
+            phone: formData.phone,
+            role: role
+          };
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Une erreur est survenue');
+      }
+
+      // Sauvegarder le token
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      alert(`${isLogin ? 'Connexion' : 'Inscription'} réussie !`);
+      onLogin(userType, data.user);
+    } catch (err: any) {
+      setError(err.message || 'Une erreur est survenue');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,24 +136,44 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
 
             {/* Nom (uniquement pour inscription) */}
             {!isLogin && (
-              <div>
-                <label htmlFor="name" className="block text-sm font-semibold text-slate-700 mb-2">
-                  Nom complet *
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    required
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="Votre nom complet"
-                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none transition-all"
-                  />
+              <>
+                <div>
+                  <label htmlFor="name" className="block text-sm font-semibold text-slate-700 mb-2">
+                    Nom complet *
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      required
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="Votre nom complet"
+                      className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none transition-all"
+                    />
+                  </div>
                 </div>
-              </div>
+
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-semibold text-slate-700 mb-2">
+                    Téléphone
+                  </label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="+224 XXX XXX XXX"
+                      className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-brand-accent focus:border-transparent outline-none transition-all"
+                    />
+                  </div>
+                </div>
+              </>
             )}
 
             {/* Email */}
@@ -251,12 +314,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
               </div>
             </div>
 
+            {/* Message d'erreur */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
             {/* Bouton de soumission */}
             <button
               type="submit"
-              className="w-full bg-brand-accent text-white py-4 rounded-lg font-bold hover:bg-amber-700 transition-colors shadow-lg"
+              disabled={loading}
+              className="w-full bg-brand-accent text-white py-4 rounded-lg font-bold hover:bg-amber-700 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLogin ? 'Se connecter' : "S'inscrire"}
+              {loading ? 'Chargement...' : (isLogin ? 'Se connecter' : "S'inscrire")}
             </button>
 
             {/* Mot de passe oublié (uniquement pour connexion) */}
