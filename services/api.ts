@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Configuration API - Hardcodé pour Render
-const API_BASE_URL = 'https://kushtati-immo-api.onrender.com/api';
+// Configuration API - Utilise la variable d'environnement ou fallback sur Render
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://kushtati-immo-api.onrender.com/api';
 
 // Instance axios avec configuration
 const api = axios.create({
