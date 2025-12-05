@@ -28,10 +28,6 @@ const getClient = (): GoogleGenerativeAI => {
 /**
  * GÉNÈRE UN CONSEIL IMMOBILIER AVEC L'IA
  * Envoie un message à Gemini AI et retourne la réponse
- * 
- * @param userMessage - Le message de l'utilisateur
- * @param history - L'historique de la conversation (optionnel)
- * @returns La réponse de l'IA sous forme de texte
  */
 export const generateRealEstateAdvice = async (
   userMessage: string,
@@ -40,17 +36,8 @@ export const generateRealEstateAdvice = async (
   try {
     const ai = getClient();
     
-    // Récupérer le modèle Gemini (utilisez gemini-1.5-flash pour plus de fiabilité)
-    const model = ai.getGenerativeModel({ 
-      model: 'gemini-1.5-flash',
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 500,
-      }
-    });
-    
     // Instructions système : définit le rôle et le comportement de l'IA
-    const systemInstruction = `You are "Kushtati AI", an expert real estate advisor for the premium agency "Kushtati Immo" in Guinea. 
+    const systemPrompt = `You are "Kushtati AI", an expert real estate advisor for the premium agency "Kushtati Immo" in Guinea. 
     Your tone is professional, warm, and sophisticated. 
     You help users find properties in Conakry and surrounding areas, understand real estate terms, and value homes.
     Prices are in Guinean Francs (GNF). You know the neighborhoods of Conakry: Kaloum, Camayenne, Kipé, Ratoma, Hamdallaye, etc.
@@ -59,25 +46,31 @@ export const generateRealEstateAdvice = async (
     
     IMPORTANT: Always respond using plain text. Do NOT use Markdown formatting (no asterisks *, bold **, or bullet points). Use simple line breaks and clear sentences instead.`;
 
-    // Construire l'historique de conversation
+    // Utilisation du nom de modèle stable et injection native des instructions système
+    const model = ai.getGenerativeModel({ 
+      model: 'gemini-1.5-pro', // Modèle stable avec quotas généreux
+      systemInstruction: systemPrompt, // Méthode native plus robuste
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 500,
+      }
+    });
+    
+    // Construire l'historique de conversation propre
     const chatHistory = history.map(msg => ({
       role: msg.role === 'user' ? 'user' : 'model',
       parts: [{ text: msg.text }]
     }));
 
-    // Démarrer le chat avec l'historique
+    // VÉRIFICATION : Assurez-vous que le premier message n'est jamais 'model'
+    if (chatHistory.length > 0 && chatHistory[0].role === 'model') {
+        // Si l'historique commence par un message du modèle, on le retire
+        chatHistory.shift(); 
+    }
+
+    // Démarrer le chat
     const chat = model.startChat({
-      history: [
-        {
-          role: 'user',
-          parts: [{ text: 'You are my real estate advisor. Please follow the instructions given.' }]
-        },
-        {
-          role: 'model',
-          parts: [{ text: systemInstruction }]
-        },
-        ...chatHistory
-      ]
+      history: chatHistory
     });
 
     // Envoyer le message et obtenir la réponse
@@ -85,47 +78,34 @@ export const generateRealEstateAdvice = async (
     const response = await result.response;
     let cleanText = response.text() || "I apologize, I couldn't generate a response at this moment.";
     
-    // Supprimer les astérisques (*, **, ***)
-    cleanText = cleanText.replace(/\*+/g, '');
-    
-    // Supprimer les tirets et plus en début de ligne (listes)
-    cleanText = cleanText.replace(/^[\-\+]\s+/gm, '');
-    
-    // Supprimer les # (titres Markdown)
-    cleanText = cleanText.replace(/^#+\s+/gm, '');
+    // Nettoyage du texte (Markdown etc)
+    cleanText = cleanText.replace(/\*+/g, ''); // Supprimer les astérisques
+    cleanText = cleanText.replace(/^[\-\+]\s+/gm, ''); // Supprimer les puces de liste
+    cleanText = cleanText.replace(/^#+\s+/gm, ''); // Supprimer les titres Markdown
     
     return cleanText.trim();
+
   } catch (error) {
     console.error("Error calling Gemini API:", error);
     
-    // Afficher plus de détails sur l'erreur
     if (error instanceof Error) {
-      console.error("❌ Gemini API Error:", {
+      console.error("❌ Gemini API Error Details:", {
         message: error.message,
         name: error.name,
       });
-    }
-    
-    // Messages d'erreur spécifiques selon le type d'erreur
-    if (error instanceof Error) {
-      // Clé API invalide ou manquante
+
+      // Gestion des erreurs spécifiques
       if (error.message.includes('API KEY NOT CONFIGURED')) {
         return "⚠️ L'assistant IA n'est pas configuré. Veuillez ajouter une clé API Gemini valide dans le fichier .env";
       }
-      
-      // Clé API révoquée ou invalide
       if (error.message.includes('API key') || error.message.includes('PERMISSION_DENIED')) {
-        return "⚠️ Clé API invalide ou révoquée. Veuillez générer une nouvelle clé sur https://aistudio.google.com/app/apikey";
+        return "⚠️ Clé API invalide ou révoquée. Veuillez vérifier votre configuration.";
       }
-      
-      // Quota dépassé
-      if (error.message.includes('quota') || error.message.includes('RESOURCE_EXHAUSTED')) {
-        return "⚠️ Quota API dépassé. Réessayez dans quelques minutes ou vérifiez votre compte Google AI Studio.";
+      if (error.message.includes('quota') || error.message.includes('RESOURCE_EXHAUSTED') || error.message.includes('429')) {
+        return "⚠️ Quota API dépassé. Patientez 1 minute avant de réessayer. Consultez votre usage sur https://ai.dev/usage";
       }
-      
-      // Modèle non disponible
       if (error.message.includes('model') || error.message.includes('NOT_FOUND')) {
-        return "⚠️ Modèle IA non disponible. Contactez l'administrateur.";
+        return "⚠️ Erreur technique (Modèle introuvable). Contactez le support.";
       }
     }
     
