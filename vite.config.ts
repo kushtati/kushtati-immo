@@ -4,10 +4,10 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   server: {
-    port: 3000,
+    port: 5173,
     host: '0.0.0.0', // Permet l'accès depuis le réseau local
     open: true, // Ouvre automatiquement le navigateur
-    strictPort: false, // Change de port si 3000 est occupé
+    strictPort: false, // Change de port si 5173 est occupé
   },
   plugins: [react()],
   resolve: {
